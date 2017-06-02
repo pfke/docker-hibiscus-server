@@ -1,0 +1,66 @@
+### This compose file will create 3 services (hibiscus, postgresql, and SQL UI)
+
+version: '2'
+services:
+
+#######################################
+  hibiscus:
+    # optional: define container name
+    # run on defined image or homegrown Dockerfile
+    build: .
+    # restart policy (having the container restart upon crash or reboot)
+    restart: always
+
+    # exposed ports [HOST:CONTAINER]
+    ports:
+      - "5050:8080"
+    links:
+      - db
+    # add environment variables from a file
+    #env_file: ./configuration.env
+    environment:
+      - PASSWORD=foo # password for user 'admin'
+      - USE_SSL=false # (serve via SSL, default:false)
+      - DB_DRIVER=mysql # postgres (default) or mysql
+      - DB_HOSTNAME=db
+      - DB_PORT=3306
+      - DB_NAME=hibiscus_db
+      - DB_USERNAME=h_user
+      - DB_PASSWORD=h_pass
+    
+#######################################
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+     - 5051:80
+    environment:
+     - MYSQL_ROOT_PASSWORD=foo
+     - MYSQL_USER=h_user
+     - MYSQL_PASSWORD=h_pass
+#     - PMA_ARBITRARY - when set to 1 connection to the arbitrary server will be allowed
+#     - PMA_HOST - define address/host name of the MySQL server
+#     - PMA_VERBOSE - define verbose name of the MySQL server
+#     - PMA_PORT - define port of the MySQL server
+#     - PMA_HOSTS - define comma separated list of address/host names of the MySQL servers
+#     - PMA_VERBOSES - define comma separated list of verbose names of the MySQL servers
+#     - PMA_USER and PMA_PASSWORD - define username to use for config authentication method
+#     - PMA_ABSOLUTE_URI - define user-facing URI
+    volumes:
+     - /sessions
+    links:
+     - db
+
+#######################################
+  db:
+    image: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+     - MYSQL_ROOT_PASSWORD=foo
+     - MYSQL_DATABASE=hibiscus_db # database to be created on image startup 
+     - MYSQL_USER=h_user
+     - MYSQL_PASSWORD=h_pass
+    volumes: 
+     - ./mysql/conf.d:/etc/mysql/conf.d
+     - ./mysql/var:/var/lib/mysql
