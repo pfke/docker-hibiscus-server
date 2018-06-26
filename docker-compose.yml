@@ -38,5 +38,5 @@ services:
      - POSTGRES_USER=${HIBIS_DB_USERNAME}
      - POSTGRES_DB=${DB_CONTAINER_NAME}
     volumes: 
-     - ./postgresql:/var/lib/postgresql/data
+     - ${HIBIS_DB_STORE}:/var/lib/postgresql/data
 
