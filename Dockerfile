@@ -1,14 +1,14 @@
-FROM ubuntu:16.04
+FROM alpine:3.7
 
 # Enable this during development.
 #RUN echo 'Acquire::http { Proxy "http://192.168.59.103:3142"; };' >> /etc/apt/apt.conf.d/01proxy
 
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get -y install default-jre
-RUN apt-get -y install postgresql-client
-RUN apt-get -y install mariadb-client
+RUN apk update && apk upgrade
+RUN apk add --no-cache bash
+RUN apk add --no-cache openjdk8-jre-base
+RUN apk add --no-cache postgresql-client
 
-RUN apt-get -y install wget unzip
+RUN apk add --no-cache wget unzip
 RUN wget http://www.willuhn.de/products/hibiscus-server/releases/hibiscus-server-2.8.0.zip
 RUN unzip hibiscus-server-*.zip -d / && rm hibiscus-server-*.zip
 
