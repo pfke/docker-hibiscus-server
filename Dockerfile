@@ -5,7 +5,7 @@ FROM alpine:3.7
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache bash
-RUN apk add --no-cache openjdk8-jre-base
+RUN apk add --no-cache openjdk8
 RUN apk add --no-cache postgresql-client
 
 RUN apk add --no-cache wget unzip
