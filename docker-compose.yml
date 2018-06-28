@@ -4,39 +4,41 @@ version: '3'
 
 services:
 #######################################
-  hibiscus:
+  hibis_svr:
     container_name: ${HIBIS_CONTAINER_NAME}
     # run on defined image or homegrown Dockerfile
     build: .
     # restart policy (having the container restart upon crash or reboot)
-    restart: always
+    restart: unless-stopped
 
     ports:
-      - ${HIBIS_SVR_PORT}:8080
+      - "${HIBIS_SVR_PORT}:8080"
     links:
-      - db
+      - hibis_db
     # add environment variables from a file
     environment:
-      - PASSWORD=${HIBIS_SVR_PASSWORD}
-      - USE_SSL=false # (serve via SSL, default:false)
-      - DB_DRIVER=postgresql # postgres (default) or mysql
-      - DB_HOSTNAME=${HIBIS_DB_HOST}
-      - DB_PORT=${HIBIS_DB_PORT}
-      - DB_NAME=${HIBIS_DB_HOST}
-      - DB_USERNAME=${HIBIS_DB_USERNAME}
-      - DB_PASSWORD=${HIBIS_DB_PASSWORD}
+      PASSWORD: ${HIBIS_SVR_PASSWORD}
+      USE_SSL: 'false' # (serve via SSL, default:false)
+      DB_DRIVER: postgres # postgres (default) or mysql
+      DB_HOSTNAME: ${HIBIS_DB_HOST}
+      DB_PORT: ${HIBIS_DB_INTERNAL_PORT}
+      DB_NAME: ${HIBIS_DB_NAME}
+      DB_USERNAME: ${HIBIS_DB_USERNAME}
+      DB_PASSWORD: ${HIBIS_DB_PASSWORD}
+    volumes: 
+      - ${HIBIS_SVR_CFG}:/hibiscus-data
     
 #######################################
-  db:
+  hibis_db:
     container_name: ${DB_CONTAINER_NAME}
     image: postgres:10-alpine
-    restart: always
+    restart: unless-stopped
     ports:
-      - ${HIBIS_DB_PORT}:5432
+      - "${HIBIS_DB_PORT}:5432"
     environment:
-     - POSTGRES_PASSWORD=${HIBIS_DB_PASSWORD}
-     - POSTGRES_USER=${HIBIS_DB_USERNAME}
-     - POSTGRES_DB=${DB_CONTAINER_NAME}
+      POSTGRES_PASSWORD: ${HIBIS_DB_PASSWORD}
+      POSTGRES_USER: ${HIBIS_DB_USERNAME}
+      POSTGRES_DB: ${HIBIS_DB_NAME}
     volumes: 
-     - ${HIBIS_DB_STORE}:/var/lib/postgresql/data
+      - ${HIBIS_DB_STORE}:/var/lib/postgresql/data
 

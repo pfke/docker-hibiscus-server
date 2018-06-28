@@ -1,16 +1,17 @@
 FROM alpine:3.7
 
-# Enable this during development.
-#RUN echo 'Acquire::http { Proxy "http://192.168.59.103:3142"; };' >> /etc/apt/apt.conf.d/01proxy
-
+ENV LANG=de_DE.UTF-8 \ 
+    LANGUAGE=de_DE.UTF-8 \
+    LC_CTYPE=de_DE.UTF-8 \
+    LC_ALL=de_DE.UTF-8
 RUN apk update && apk upgrade
-RUN apk add --no-cache bash
-RUN apk add --no-cache openjdk8
-RUN apk add --no-cache postgresql-client
 
-RUN apk add --no-cache wget unzip
-RUN wget http://www.willuhn.de/products/hibiscus-server/releases/hibiscus-server-2.8.0.zip
+RUN apk add --no-cache bash openjdk8 postgresql-client wget unzip
+RUN ln -fs /usr/share/zoneinfo/GMT /etc/localtime
+
+RUN wget -nv http://www.willuhn.de/products/hibiscus-server/releases/hibiscus-server-2.8.0.zip
 RUN unzip hibiscus-server-*.zip -d / && rm hibiscus-server-*.zip
+RUN mkdir /hibiscus-data
 
 ADD wrap.sh /wrap/
 ENTRYPOINT ["bash", "/wrap/wrap.sh"]

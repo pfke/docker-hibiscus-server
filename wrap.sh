@@ -61,7 +61,7 @@ function initdb() {
 
     case "$DB_DRIVER" in
         postgres)
-            cmd="psql -h $DB_HOSTNAME -p ${DB_PORT-5432} -U $DB_USERNAME  < /hibiscus-server/plugins/hibiscus/sql/postgresql-create.sql"
+            cmd="psql -h $DB_HOSTNAME -p ${DB_PORT-5432} -U $DB_USERNAME -d $DB_NAME < /hibiscus-server/plugins/hibiscus/sql/postgresql-create.sql"
             echo $cmd
             eval PGPASSWORD=$DB_PASSWORD $cmd
             ;;
@@ -98,4 +98,4 @@ initdb
 
 
 # Write configuration file based on desired database driver
-${@-/hibiscus-server/jameicaserver.sh -p $PASSWORD -f /srv/hibiscus}
+${@-/hibiscus-server/jameicaserver.sh -p $PASSWORD -f /hibiscus-data}
