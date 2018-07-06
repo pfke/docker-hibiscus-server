@@ -6,7 +6,7 @@ ENV LANG=de_DE.UTF-8 \
     LC_ALL=de_DE.UTF-8
 RUN apk update && apk upgrade
 
-RUN apk add --no-cache bash openjdk8 postgresql-client wget unzip
+RUN apk add --no-cache bash openjdk8 mariadb-client wget unzip
 RUN ln -fs /usr/share/zoneinfo/GMT /etc/localtime
 
 RUN wget -nv http://www.willuhn.de/products/hibiscus-server/releases/hibiscus-server-2.8.0.zip

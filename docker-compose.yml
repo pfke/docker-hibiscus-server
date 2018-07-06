@@ -1,4 +1,4 @@
-### This compose file will create 3 services (hibiscus, postgresql, and SQL UI)
+### This compose file will create 2 services (hibiskus, mariadb)
 
 version: '3'
 
@@ -18,27 +18,51 @@ services:
     # add environment variables from a file
     environment:
       PASSWORD: ${HIBIS_SVR_PASSWORD}
-      USE_SSL: 'false' # (serve via SSL, default:false)
-      DB_DRIVER: postgres # postgres (default) or mysql
+      USE_SSL: 'true' # (serve via SSL, default:false)
+      DB_DRIVER: mysql
       DB_HOSTNAME: ${HIBIS_DB_HOST}
       DB_PORT: ${HIBIS_DB_INTERNAL_PORT}
       DB_NAME: ${HIBIS_DB_NAME}
       DB_USERNAME: ${HIBIS_DB_USERNAME}
       DB_PASSWORD: ${HIBIS_DB_PASSWORD}
     volumes: 
-      - ${HIBIS_SVR_CFG}:/hibiscus-data
-    
+      - ${HIBIS_SVR_CFG}:/hibiskus-data
+
+#######################################
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin
+#    restart: unless-stopped
+#    ports:
+#      - "${HIBIS_ADMIN_PORT}:80"
+#    environment:
+#     MYSQL_ROOT_PASSWORD=${HIBIS_DB_ROOT_PASSWORD}
+#     MYSQL_USER=${HIBIS_DB_USERNAME}
+#     MYSQL_PASSWORD=${HIBIS_DB_PASSWORD}
+##     - PMA_ARBITRARY - when set to 1 connection to the arbitrary server will be allowed
+##     - PMA_HOST - define address/host name of the MySQL server
+##     - PMA_VERBOSE - define verbose name of the MySQL server
+##     - PMA_PORT - define port of the MySQL server
+##     - PMA_HOSTS - define comma separated list of address/host names of the MySQL servers
+##     - PMA_VERBOSES - define comma separated list of verbose names of the MySQL servers
+##     - PMA_USER and PMA_PASSWORD - define username to use for config authentication method
+##     - PMA_ABSOLUTE_URI - define user-facing URI
+#    volumes:
+#      - ${HIBIS_DB_STORE}/sessions
+#    links:
+#      - db 
+
 #######################################
   hibis_db:
     container_name: ${DB_CONTAINER_NAME}
-    image: postgres:10-alpine
+    image: mariadb
     restart: unless-stopped
     ports:
-      - "${HIBIS_DB_PORT}:5432"
+      - "${HIBIS_DB_PORT}:3306"
     environment:
-      POSTGRES_PASSWORD: ${HIBIS_DB_PASSWORD}
-      POSTGRES_USER: ${HIBIS_DB_USERNAME}
-      POSTGRES_DB: ${HIBIS_DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${HIBIS_DB_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${HIBIS_DB_PASSWORD}
+      MYSQL_USER: ${HIBIS_DB_USERNAME}
+      MYSQL_DATABASE: ${HIBIS_DB_NAME}
     volumes: 
-      - ${HIBIS_DB_STORE}:/var/lib/postgresql/data
-
+      - ${HIBIS_DB_STORE}/conf.d:/etc/mysql/conf.d
+      - ${HIBIS_DB_STORE}/var:/var/lib/mysql

@@ -21,17 +21,6 @@ database.driver.mysql.password=${DB_PASSWORD}
 EOF
     ;;
 
-postgres)
-    DB_ADDR=${DB_HOSTNAME}:${DB_PORT-5432}
-    echo "Configuring PostgreSQL db connection to $DB_ADDR"
-    cat > $dbconfig <<EOF
-database.driver=de.willuhn.jameica.hbci.server.DBSupportPostgreSQLImpl
-database.driver.postgresql.jdbcurl=jdbc\:postgresql\://${DB_ADDR/:/\\:}/${DB_NAME}
-database.driver.postgresql.username=${DB_USERNAME}
-database.driver.postgresql.password=${DB_PASSWORD}
-EOF
-    ;;
-
 *)
     echo "Configuring local embedded database"
     # We'll delete the mysql config for now to use the embedded db
@@ -60,14 +49,8 @@ function initdb() {
     echo "Initializing ..."
 
     case "$DB_DRIVER" in
-        postgres)
-            cmd="psql -h $DB_HOSTNAME -p ${DB_PORT-5432} -U $DB_USERNAME -d $DB_NAME < /hibiscus-server/plugins/hibiscus/sql/postgresql-create.sql"
-            echo $cmd
-            eval PGPASSWORD=$DB_PASSWORD $cmd
-            ;;
-
         mysql)
-            cmd="mysql -u $DB_USERNAME --password=${DB_PASSWORD} -P ${DB_PORT-3306} -h $DB_HOSTNAME $DB_NAME < /hibiscus-server/plugins/hibiscus/sql/mysql-create.sql"
+            cmd="mysql --user=$DB_USERNAME --password=${DB_PASSWORD} --port=${DB_PORT-3306} --host=$DB_HOSTNAME $DB_NAME < /hibiscus-server/plugins/hibiscus/sql/mysql-create.sql"
             echo $cmd
             eval $cmd 
                         ;;
@@ -79,23 +62,13 @@ function initdb() {
     
 }
 
-if [ "$*" == "initdb" ]; then
-        initdb
-        exit
+FILE=initialized.flag
+if [ ! -f $FILE ]; then
+   initdb
+   touch $FILE
+else
+   echo "Already initalized!"
 fi
-
-
-initdb
-
-# FILE=initialized.flag
-# if [ ! -f $FILE ]; then
-#    initdb
-#    touch $FILE
-#    exit
-# else
-#    echo "Already initalized!"
-# fi
-
 
 # Write configuration file based on desired database driver
 ${@-/hibiscus-server/jameicaserver.sh -p $PASSWORD -f /hibiscus-data}
